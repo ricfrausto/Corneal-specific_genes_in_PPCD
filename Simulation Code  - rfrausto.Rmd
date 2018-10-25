@@ -1,0 +1,119 @@
+---
+title: "Probability of Genes"
+author: "David Wong and Liam Carrigan"
+date: "November 15, 2017"
+output: html_document
+---
+
+
+
+```{r}
+probcommon <- function(pool1, pool2, common, samp1size, samp2size, threshold)
+{
+  # set.seed(9999)
+  # Numerically, Liam and I agreed that we required a number from Ricardo Frausto that was the quantity of genes in both pools that were already common between them.
+  uncommon <- pool1 - common
+  n1 <- 1:pool1
+  n2 <- uncommon:(uncommon+pool2)
+  
+  commonl <- list()
+  commoner <- 0
+  
+  for(j in 1:10000)
+  {
+    set.seed(j)
+    a <- sample(n1, samp1size, replace = F)
+    b <- sample(n2, samp2size, replace = F)
+  
+  for(i in 1:length(a))
+    {
+      for(k in 1:length(b))
+      {
+      if(a[i] == b[k])
+        commoner = commoner + 1
+      }
+    }
+  commonl[j] <- commoner
+  commoner <- 0
+  }
+  results <- (unlist(commonl))
+  pval <- length(which(commonl >= threshold))/10000
+  expec <- mean(unlist(commonl))
+  return(list(pval,expec, results))
+}
+```
+
+Simulation 1
+Probability of 40 genes being common between a sample of 108 selected from 8049 and 795 selected from 8432
+with 6314 common genes
+```{r}
+sim1 <- probcommon(8049, 8432, 6314, 108, 795, 40)
+```
+1-10000 seeds:
+P-value: 0.00
+Mean:8.01
+
+
+
+Simulation 2
+Probability of 65 genes being common between a sample of 249 selected from 8384 and 920 selected from 8432 with 6459 common genes
+```{r}
+sim2 <- probcommon(8384, 8432, 6459, 249, 920, 65)
+```
+1-10000 seeds:
+P-value: 0.00
+Mean: 20.9
+
+
+Simulation 3
+Probility of 3 genes being common between a sample of 108 selected from 8049 and 920 selected from 8432 with 6314 common genes
+```{r}
+sim3 <- probcommon(8049, 8432, 6314, 108, 920, 3)
+```
+1-10000 seeds:
+P-value:0.995
+Mean: 9.27
+
+
+Simulation 4
+Probability of 3 genes being common between a sample of 249 selected from 8384 and 795 selected from 8432 with 6459 common genes
+```{r}
+sim4 <- probcommon(8384, 8432, 6459, 249, 795, 3)
+```
+1-10000 seeds:
+P-value: 1.00
+Mean: 18.1
+
+
+```{r}
+#Graphing
+par(mfrow = c(2,2))
+hist(sim1[[3]], main = "Sampling Distribution of Simulation 1", xlim = c(0, 42), breaks = 20, xlab = 'Number of Common Genes Out of 6314')
+abline(v = 40, col = 'red', lwd = 2)
+
+hist(sim2[[3]], main = "Sampling Distribution of Simulation 2", xlim = c(0, 72), breaks = 20, xlab = 'Number of Common Genes Out of 6459')
+abline(v = 65, col = 'red', lwd = 2)
+
+hist(sim3[[3]], main = "Sampling Distribution of Simulation 3", xlim = c(0, (max(sim3[[3]]) + 2)), breaks = 20, xlab = 'Number of Common Genes Out of 6314')
+abline(v = 3, col = 'red', lwd = 2)
+
+hist(sim4[[3]], main = "Sampling Distribution of Simulation 4", xlim = c(0, (max(sim4[[3]]) + 2)), breaks = 20, xlab = 'Number of Common Genes Out of 6459')
+abline(v = 3, col = 'red', lwd = 2)
+```
+
+
+
+```{r, echo=FALSE}
+#Creating table of means and p-values
+means <- data.frame(matrix(c(sim1[[2]], sim2[[2]], sim3[[2]], sim4[[2]], sim1[[1]], sim2[[1]], sim3[[1]], sim4[[1]]), nrow = 2, byrow = TRUE))
+colnames(means) <- c("Simulation 1", "Simulation 2", "Simulation 3", "Simulation 4")
+rownames(means) <- c("Means", "P-Values")
+
+
+```
+
+--------------------------------------------------------------------------
+
+
+
+  
